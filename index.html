@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepSeek Chat Client</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .hero {
+      padding: 100px 0;
+      background-color: #0d6efd;
+      color: white;
+      text-align: center;
+    }
+
+    .card-output {
+      white-space: pre-wrap;
+      background-color: #f1f1f1;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .history-item {
+      background-color: #ffffff;
+      border-left: 3px solid #0d6efd;
+      margin-bottom: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">DeepSeek Chat</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>DeepSeek Chat Client</h1>
+      <p>Interact with DeepSeek API using your own API key. Fully customizable and local history support.</p>
+      <a href="#chatForm" class="btn btn-light">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Main Form Section -->
+  <div class="container my-5" id="chatForm">
+    <div class="card p-4">
+      <h4>Chat with DeepSeek</h4>
+      <div class="mb-3">
+        <label for="apiKey" class="form-label">API Key</label>
+        <input type="password" class="form-control" id="apiKey" placeholder="Enter your DeepSeek API Key">
+      </div>
+      <div class="mb-3">
+        <label for="prompt" class="form-label">Your Prompt</label>
+        <textarea class="form-control" id="prompt" rows="3"></textarea>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="responseType" class="form-label">Response Type</label>
+          <select class="form-select" id="responseType">
+            <option value="default">Default</option>
+            <option value="code">Code</option>
+            <option value="chat">Chat</option>
+          </select>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="maxTokens" class="form-label">Max Tokens</label>
+          <input type="number" class="form-control" id="maxTokens" value="1000" min="100" max="4096">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="temperature" class="form-label">Temperature</label>
+          <input type="number" step="0.1" min="0" max="1" class="form-control" id="temperature" value="0.7">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="sendPrompt()">Send</button>
+      <button class="btn btn-secondary ms-2" onclick="copyResponse()">Copy Response</button>
+      <div id="loading" class="mt-3 d-none">Loading...</div>
+      <div id="output" class="card-output mt-3"></div>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div class="container mb-5">
+    <h5>Conversation History</h5>
+    <div id="history"></div>
+    <button class="btn btn-danger mt-2" onclick="clearHistory()">Clear History</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light text-center py-3">
+    <p>© 2025 DeepSeek Client. <a href="#">GitHub</a> | <a href="#">Privacy Policy</a></p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- JavaScript Logic -->
+  <script>
+    function sendPrompt() {
+      const apiKey = document.getElementById('apiKey').value.trim();
+      const prompt = document.getElementById('prompt').value.trim();
+      const type = document.getElementById('responseType').value;
+      const maxTokens = parseInt(document.getElementById('maxTokens').value);
+      const temperature = parseFloat(document.getElementById('temperature').value);
+
+      if (!apiKey || !prompt) {
+        alert("API Key and prompt are required.");
+        return;
+      }
+
+      document.getElementById('loading').classList.remove('d-none');
+
+      fetch("https://api.deepseek.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [{ role: "user", content: prompt }],
+          temperature: temperature,
+          max_tokens: maxTokens
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          const result = data.choices?.[0]?.message?.content || "No response.";
+          document.getElementById('output').textContent = result;
+          saveToHistory(prompt, result);
+          loadHistory();
+        })
+        .catch(err => {
+          alert("Error fetching API: " + err.message);
+        })
+        .finally(() => {
+          document.getElementById('loading').classList.add('d-none');
+        });
+    }
+
+    function copyResponse() {
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+    }
+
+    function saveToHistory(prompt, response) {
+      let history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+      history.unshift({ prompt, response, time: new Date().toLocaleString() });
+      if (history.length > 20) history = history.slice(0, 20);
+      localStorage.setItem('chatHistory', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      const container = document.getElementById('history');
+      container.innerHTML = '';
+      const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `<strong>[${item.time}]</strong><br><em>${item.prompt}</em><hr>${item.response}`;
+        container.appendChild(div);
+      });
+    }
+
+    function clearHistory() {
+      localStorage.removeItem('chatHistory');
+      loadHistory();
+    }
+
+    // Load history on page load
+    window.onload = loadHistory;
+  </script>
+</body>
+
+</html>
