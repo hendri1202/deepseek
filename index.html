@@ -1,125 +1,396 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeepSeek Chat Client</title>
-  <!-- Bootstrap 5 CSS -->
+  <title>DeepSeek Chat Client (Versi Chat)</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Inter', sans-serif;
       background-color: #f8f9fa;
     }
 
     .hero {
-      padding: 100px 0;
+      padding: 60px 0;
       background-color: #0d6efd;
       color: white;
       text-align: center;
+      border-bottom-left-radius: 1.5rem;
+      border-bottom-right-radius: 1.5rem;
+    }
+
+     .hero h1 {
+        font-weight: 700;
+     }
+
+    .card {
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: none;
     }
 
     .card-output {
       white-space: pre-wrap;
-      background-color: #f1f1f1;
+      background-color: #e9ecef;
       padding: 1rem;
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
+      min-height: 100px;
+      margin-top: 1rem;
+      border: 1px solid #dee2e6;
     }
 
-    .history-item {
-      background-color: #ffffff;
-      border-left: 3px solid #0d6efd;
-      margin-bottom: 10px;
-      padding: 10px;
+    /* Styles untuk riwayat chat */
+    #historyContainer {
+        border: 1px solid #dee2e6;
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        padding: 1rem;
+        margin-top: 1rem;
     }
+
+    #history {
+        max-height: 450px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    /* Styling scrollbar */
+    #history::-webkit-scrollbar {
+      width: 6px;
+    }
+    #history::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    #history::-webkit-scrollbar-thumb {
+      background: #ced4da;
+      border-radius: 10px;
+    }
+    #history::-webkit-scrollbar-thumb:hover {
+      background: #adb5bd;
+    }
+
+    .chat-message {
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-bubble {
+        padding: 0.6rem 1rem;
+        border-radius: 1rem;
+        max-width: 75%;
+        word-wrap: break-word;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        /* Menambahkan style untuk elemen hasil markdown */
+        line-height: 1.6; /* Memperbaiki jarak baris */
+    }
+     /* Style spesifik untuk elemen dalam bubble hasil parse markdown */
+    .message-bubble p:last-child {
+        margin-bottom: 0; /* Hapus margin bawah paragraf terakhir */
+    }
+    .message-bubble h1, .message-bubble h2, .message-bubble h3, .message-bubble h4, .message-bubble h5, .message-bubble h6 {
+        margin-top: 0.8em;
+        margin-bottom: 0.4em;
+        font-weight: 600;
+    }
+     .message-bubble h2 { font-size: 1.3em; }
+     .message-bubble h3 { font-size: 1.15em; }
+    .message-bubble ul, .message-bubble ol {
+        padding-left: 1.5em; /* Indentasi list */
+        margin-bottom: 0.5em;
+    }
+     .message-bubble li {
+         margin-bottom: 0.2em;
+     }
+    .message-bubble pre {
+        background-color: #f1f1f1;
+        padding: 0.8em;
+        border-radius: 0.5rem;
+        overflow-x: auto; /* Scroll horizontal untuk kode panjang */
+        font-family: 'Courier New', Courier, monospace; /* Font Monospace untuk kode */
+        font-size: 0.9em;
+        margin: 0.5em 0;
+    }
+    .message-bubble code {
+         font-family: 'Courier New', Courier, monospace;
+         background-color: rgba(0,0,0,0.05); /* Background tipis untuk inline code */
+         padding: 0.1em 0.3em;
+         border-radius: 0.2rem;
+    }
+    .message-bubble pre code {
+        background-color: transparent; /* Hapus background jika di dalam <pre> */
+        padding: 0;
+    }
+    .message-bubble blockquote {
+        border-left: 3px solid #ced4da;
+        padding-left: 0.8em;
+        margin-left: 0;
+        color: #6c757d;
+        font-style: italic;
+    }
+    .message-bubble table {
+        width: auto; /* Atau 100% jika ingin full width */
+        border-collapse: collapse;
+        margin: 1em 0;
+        font-size: 0.9em;
+    }
+    .message-bubble th, .message-bubble td {
+        border: 1px solid #dee2e6;
+        padding: 0.4em 0.6em;
+    }
+     .message-bubble th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+     }
+
+
+    .user-message {
+        align-items: flex-end;
+    }
+
+    .user-message .message-bubble {
+        background-color: #0d6efd;
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+     /* Override warna link di bubble user */
+    .user-message .message-bubble a {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+     .user-message .message-bubble code {
+         background-color: rgba(255, 255, 255, 0.2); /* Background kode di bubble user */
+     }
+     .user-message .message-bubble pre {
+         background-color: rgba(0, 0, 0, 0.2); /* Background pre di bubble user */
+     }
+
+
+     .ai-message {
+         align-items: flex-start;
+     }
+
+    .ai-message .message-bubble {
+        background-color: #e9ecef;
+        color: #212529;
+        border-bottom-left-radius: 0.25rem;
+    }
+     /* Warna link default di bubble AI */
+    .ai-message .message-bubble a {
+        color: #0d6efd;
+    }
+
+    .message-sender {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .user-message .message-sender {
+        text-align: right;
+        margin-right: 0.5rem;
+    }
+
+    .ai-message .message-sender {
+       text-align: left;
+       margin-left: 0.5rem;
+    }
+
+     .message-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        margin-top: 0.25rem;
+     }
+
+     .user-message .message-time {
+        text-align: right;
+        margin-right: 0.5rem;
+     }
+
+      .ai-message .message-time {
+        text-align: left;
+        margin-left: 0.5rem;
+     }
+
+     /* Style untuk tombol */
+     .btn {
+         border-radius: 0.5rem;
+         padding: 0.5rem 1rem;
+         font-weight: 500;
+     }
+
+     .btn-primary {
+         background-color: #0d6efd;
+         border-color: #0d6efd;
+     }
+
+     .btn-secondary {
+         background-color: #6c757d;
+         border-color: #6c757d;
+     }
+
+     .btn-danger {
+         background-color: #dc3545;
+         border-color: #dc3545;
+     }
+
+     /* Style untuk loading */
+     #loading {
+         color: #0d6efd;
+         font-weight: 500;
+     }
+
+     /* Footer styling */
+     footer {
+         margin-top: 3rem;
+         padding: 1.5rem 0;
+         background-color: #e9ecef;
+         color: #6c757d;
+     }
+     footer a {
+         color: #0d6efd;
+         text-decoration: none;
+     }
+     footer a:hover {
+         text-decoration: underline;
+     }
+
   </style>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">DeepSeek Chat</a>
+      <a class="navbar-brand fw-bold" href="#">DeepSeek Chat</a>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero mb-5">
     <div class="container">
       <h1>DeepSeek Chat Client</h1>
-      <p>Interact with DeepSeek API using your own API key. Fully customizable and local history support.</p>
-      <a href="#chatForm" class="btn btn-light">Get Started</a>
+      <p class="lead">Berinteraksi dengan DeepSeek API menggunakan kunci API Anda.</p>
     </div>
   </section>
 
-  <!-- Main Form Section -->
-  <div class="container my-5" id="chatForm">
-    <div class="card p-4">
-      <h4>Chat with DeepSeek</h4>
-      <div class="mb-3">
-        <label for="apiKey" class="form-label">API Key</label>
-        <input type="password" class="form-control" id="apiKey" placeholder="Enter your DeepSeek API Key">
-      </div>
-      <div class="mb-3">
-        <label for="prompt" class="form-label">Your Prompt</label>
-        <textarea class="form-control" id="prompt" rows="3"></textarea>
-      </div>
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <label for="responseType" class="form-label">Response Type</label>
-          <select class="form-select" id="responseType">
-            <option value="default">Default</option>
-            <option value="code">Code</option>
-            <option value="chat">Chat</option>
-          </select>
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="maxTokens" class="form-label">Max Tokens</label>
-          <input type="number" class="form-control" id="maxTokens" value="1000" min="100" max="4096">
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="temperature" class="form-label">Temperature</label>
-          <input type="number" step="0.1" min="0" max="1" class="form-control" id="temperature" value="0.7">
-        </div>
-      </div>
-      <button class="btn btn-primary" onclick="sendPrompt()">Send</button>
-      <button class="btn btn-secondary ms-2" onclick="copyResponse()">Copy Response</button>
-      <div id="loading" class="mt-3 d-none">Loading...</div>
-      <div id="output" class="card-output mt-3"></div>
-    </div>
-  </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
 
-  <!-- History Section -->
-  <div class="container mb-5">
-    <h5>Conversation History</h5>
-    <div id="history"></div>
-    <button class="btn btn-danger mt-2" onclick="clearHistory()">Clear History</button>
-  </div>
+        <div class="card p-4 mb-4" id="chatForm">
+          <h4 class="mb-3">Chat dengan DeepSeek</h4>
+          <div class="mb-3">
+            <label for="apiKey" class="form-label">Kunci API</label>
+            <input type="password" class="form-control" id="apiKey" placeholder="Masukkan Kunci API DeepSeek Anda">
+          </div>
+          <div class="mb-3">
+            <label for="prompt" class="form-label">Prompt Anda</label>
+            <textarea class="form-control" id="prompt" rows="3" placeholder="Ketik pesan Anda di sini..."></textarea>
+          </div>
+          <div class="accordion accordion-flush mb-3" id="advancedOptionsAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="flush-headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                  Opsi Lanjutan
+                </button>
+              </h2>
+              <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#advancedOptionsAccordion">
+                <div class="accordion-body">
+                  <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                      <label for="responseType" class="form-label">Tipe Respon</label>
+                      <select class="form-select" id="responseType">
+                        <option value="default">Default</option>
+                        <option value="code">Kode</option>
+                        <option value="chat">Chat</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                      <label for="maxTokens" class="form-label">Max Tokens</label>
+                      <input type="number" class="form-control" id="maxTokens" value="1000" min="100" max="8192">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="temperature" class="form-label">Temperature</label>
+                      <input type="number" step="0.1" min="0" max="1" class="form-control" id="temperature" value="0.7">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+              <div>
+                  <button class="btn btn-primary" onclick="sendPrompt()">Kirim</button>
+                  <button class="btn btn-secondary ms-2" onclick="copyResponse()">Salin Respon</button>
+              </div>
+              <div id="loading" class="d-none">
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Memproses...</span>
+              </div>
+          </div>
+           <div id="output" class="card-output mt-3 d-none"></div>
+        </div>
 
-  <!-- Footer -->
-  <footer class="bg-light text-center py-3">
-    <p>© 2025 DeepSeek Client. <a href="#">GitHub</a> | <a href="#">Privacy Policy</a></p>
+        <div id="historyContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                 <h5 class="mb-0">Riwayat Percakapan</h5>
+                 <button class="btn btn-sm btn-outline-danger" onclick="clearHistory()">
+                     Hapus Riwayat
+                 </button>
+            </div>
+            <div id="history">
+                </div>
+        </div>
+
+      </div> </div> </div> <footer class="text-center py-4 mt-5">
+    <p class="mb-0">© 2025 DeepSeek Client Mod. Dibuat dengan <span style="color: #e25555;">&hearts;</span></p>
   </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- JavaScript Logic -->
   <script>
+    const historyElement = document.getElementById('history');
+    const outputElement = document.getElementById('output');
+    const loadingElement = document.getElementById('loading');
+    const promptElement = document.getElementById('prompt');
+    const apiKeyElement = document.getElementById('apiKey');
+    const responseTypeElement = document.getElementById('responseType');
+    const maxTokensElement = document.getElementById('maxTokens');
+    const temperatureElement = document.getElementById('temperature');
+
+    // Konfigurasi Marked.js (opsional, bisa ditambahkan jika perlu kustomisasi)
+    // marked.setOptions({
+    //   breaks: true, // Mengubah baris baru menjadi <br>
+    //   gfm: true // Mengaktifkan GitHub Flavored Markdown
+    // });
+
+    /**
+     * Mengirim prompt ke API DeepSeek.
+     */
     function sendPrompt() {
-      const apiKey = document.getElementById('apiKey').value.trim();
-      const prompt = document.getElementById('prompt').value.trim();
-      const type = document.getElementById('responseType').value;
-      const maxTokens = parseInt(document.getElementById('maxTokens').value);
-      const temperature = parseFloat(document.getElementById('temperature').value);
+      const apiKey = apiKeyElement.value.trim();
+      const prompt = promptElement.value.trim();
+      const type = responseTypeElement.value;
+      const maxTokens = parseInt(maxTokensElement.value);
+      const temperature = parseFloat(temperatureElement.value);
 
       if (!apiKey || !prompt) {
-        alert("API Key and prompt are required.");
+        alert("Kunci API dan prompt tidak boleh kosong.");
         return;
       }
 
-      document.getElementById('loading').classList.remove('d-none');
+      loadingElement.classList.remove('d-none');
+      outputElement.textContent = '';
+      outputElement.classList.add('d-none');
 
       fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
@@ -131,55 +402,157 @@
           model: "deepseek-chat",
           messages: [{ role: "user", content: prompt }],
           temperature: temperature,
-          max_tokens: maxTokens
+          max_tokens: maxTokens,
+          stream: false
         })
       })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+               return res.json().then(errData => {
+                   const errorMessage = errData.error?.message || `HTTP error! status: ${res.status}`;
+                   throw new Error(errorMessage);
+               });
+            }
+            return res.json();
+        })
         .then(data => {
-          const result = data.choices?.[0]?.message?.content || "No response.";
-          document.getElementById('output').textContent = result;
-          saveToHistory(prompt, result);
-          loadHistory();
+          const result = data.choices?.[0]?.message?.content || "Tidak ada respons dari API.";
+          saveToHistory(prompt, result); // Simpan respons mentah (Markdown)
+          loadHistory(); // Muat ulang riwayat (akan diparse saat dimuat)
+          promptElement.value = '';
         })
         .catch(err => {
-          alert("Error fetching API: " + err.message);
+          console.error("Error saat fetch API:", err);
+          const errorMessageToShow = `Error: ${err.message}`;
+          outputElement.textContent = errorMessageToShow;
+          outputElement.classList.remove('d-none');
+          alert(errorMessageToShow);
         })
         .finally(() => {
-          document.getElementById('loading').classList.add('d-none');
+          loadingElement.classList.add('d-none');
         });
     }
 
+    /**
+     * Menyalin respons AI terakhir (sebagai teks mentah) dari riwayat.
+     */
     function copyResponse() {
-      const text = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+      const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+      if (history.length > 0) {
+          const lastResponse = history[history.length - 1].response; // Teks mentah
+          navigator.clipboard.writeText(lastResponse)
+            .then(() => alert("Respon AI terakhir (teks mentah) disalin!"))
+            .catch(err => {
+                console.error("Gagal menyalin:", err);
+                alert("Gagal menyalin teks.");
+            });
+      } else {
+          alert("Tidak ada respon untuk disalin.");
+      }
     }
 
+    /**
+     * Menyimpan pasangan prompt dan respons (mentah) ke Local Storage.
+     */
     function saveToHistory(prompt, response) {
       let history = JSON.parse(localStorage.getItem('chatHistory')) || [];
-      history.unshift({ prompt, response, time: new Date().toLocaleString() });
-      if (history.length > 20) history = history.slice(0, 20);
+      history.push({
+          prompt,
+          response, // Simpan respons mentah (Markdown)
+          time: new Date().toISOString()
+        });
       localStorage.setItem('chatHistory', JSON.stringify(history));
     }
 
+    /**
+     * Memuat riwayat, mem-parse Markdown respons AI, dan menampilkannya.
+     */
     function loadHistory() {
-      const container = document.getElementById('history');
-      container.innerHTML = '';
-      const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
-      history.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        div.innerHTML = `<strong>[${item.time}]</strong><br><em>${item.prompt}</em><hr>${item.response}`;
-        container.appendChild(div);
-      });
+        historyElement.innerHTML = '';
+        const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+
+        history.forEach(item => {
+            // --- Pesan Pengguna ---
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-message user-message';
+            // Gunakan escapeHtml untuk prompt pengguna demi keamanan
+            const userBubbleHtml = `<div class="message-bubble">${escapeHtml(item.prompt)}</div>`;
+            userDiv.innerHTML = `
+                <div class="message-sender">Anda</div>
+                ${userBubbleHtml}
+                <div class="message-time">${formatChatTime(item.time)}</div>
+            `;
+            historyElement.appendChild(userDiv);
+
+            // --- Pesan AI ---
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'chat-message ai-message';
+            // Parse Markdown respons AI menjadi HTML menggunakan marked.parse()
+            // PENTING: Tidak menggunakan escapeHtml di sini karena outputnya sudah HTML.
+            // PERHATIAN: Jika respons API bisa mengandung script berbahaya, pertimbangkan
+            // pustaka sanitasi seperti DOMPurify setelah parsing.
+            const aiBubbleHtml = `<div class="message-bubble">${marked.parse(item.response || '')}</div>`;
+            aiDiv.innerHTML = `
+                 <div class="message-sender">DeepSeek</div>
+                 ${aiBubbleHtml}
+                 <div class="message-time">${formatChatTime(item.time)}</div>
+            `;
+            historyElement.appendChild(aiDiv);
+        });
+
+        scrollToBottom(); // Scroll ke bawah setelah memuat
     }
 
+    /**
+     * Menghapus semua riwayat percakapan.
+     */
     function clearHistory() {
-      localStorage.removeItem('chatHistory');
-      loadHistory();
+      if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat percakapan?")) {
+          localStorage.removeItem('chatHistory');
+          loadHistory();
+      }
     }
 
-    // Load history on page load
+    /**
+     * Fungsi utilitas untuk escape HTML sederhana.
+     */
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+    }
+
+    /**
+     * Memformat waktu ISO string menjadi HH:MM.
+     */
+    function formatChatTime(isoString) {
+        const date = new Date(isoString);
+        const options = { hour: '2-digit', minute: '2-digit', hour12: false };
+        return date.toLocaleTimeString('id-ID', options);
+    }
+
+    /**
+     * Scroll otomatis ke bawah kontainer chat.
+     */
+    function scrollToBottom() {
+        historyElement.scrollTop = historyElement.scrollHeight;
+    }
+
+    // --- Event Listeners ---
+    promptElement.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendPrompt();
+        }
+    });
+
+    // Memuat riwayat saat halaman dibuka
     window.onload = loadHistory;
+
   </script>
 </body>
 
