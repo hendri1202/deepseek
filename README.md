@@ -7,7 +7,7 @@ Aplikasi ini adalah klien chat sederhana berbasis web untuk berinteraksi dengan 
 ## Fitur Utama
 
 * 🔑 **Autentikasi API**: Masukkan kunci API DeepSeek kamu untuk otorisasi.
-* 💬 **Chat Interaktif**: Kirim prompt dan terima balasan dalam format Markdown yang lebih menarik.
+* 💬 **Chat Interaktif**: Kirim prompt dan terima balasan dalam format Markdown yang lebih menarik, menampilkan respon dari API Deepseek secara real time(Stream Response).
 * 📜 **Riwayat Percakapan**: Simpan semua chat di `localStorage`, bisa dihapus dan dipanggil ulang kapan saja.
 * 🛠️ **Opsi Lanjutan**: Atur tipe respons, jumlah `max_tokens`, dan `temperature` sesuai kebutuhan.
 * 🖥️ **Desain Responsif**: Dibangun dengan Bootstrap 5 dan font Inter, nyaman di desktop maupun mobile.
