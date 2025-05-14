@@ -35,7 +35,7 @@
         border: none;
     }
 
-    .card-output {
+    .card-output { /* Tetap digunakan untuk fallback atau non-stream, tapi riwayat chat akan diutamakan */
       white-space: pre-wrap;
       background-color: #e9ecef;
       padding: 1rem;
@@ -45,7 +45,6 @@
       border: 1px solid #dee2e6;
     }
 
-    /* Styles untuk riwayat chat */
     #historyContainer {
         border: 1px solid #dee2e6;
         border-radius: 0.75rem;
@@ -60,7 +59,6 @@
         padding-right: 10px;
     }
 
-    /* Styling scrollbar */
     #history::-webkit-scrollbar {
       width: 6px;
     }
@@ -88,12 +86,10 @@
         max-width: 75%;
         word-wrap: break-word;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        /* Menambahkan style untuk elemen hasil markdown */
-        line-height: 1.6; /* Memperbaiki jarak baris */
+        line-height: 1.6;
     }
-     /* Style spesifik untuk elemen dalam bubble hasil parse markdown */
     .message-bubble p:last-child {
-        margin-bottom: 0; /* Hapus margin bawah paragraf terakhir */
+        margin-bottom: 0;
     }
     .message-bubble h1, .message-bubble h2, .message-bubble h3, .message-bubble h4, .message-bubble h5, .message-bubble h6 {
         margin-top: 0.8em;
@@ -103,7 +99,7 @@
      .message-bubble h2 { font-size: 1.3em; }
      .message-bubble h3 { font-size: 1.15em; }
     .message-bubble ul, .message-bubble ol {
-        padding-left: 1.5em; /* Indentasi list */
+        padding-left: 1.5em;
         margin-bottom: 0.5em;
     }
      .message-bubble li {
@@ -113,19 +109,19 @@
         background-color: #f1f1f1;
         padding: 0.8em;
         border-radius: 0.5rem;
-        overflow-x: auto; /* Scroll horizontal untuk kode panjang */
-        font-family: 'Courier New', Courier, monospace; /* Font Monospace untuk kode */
+        overflow-x: auto;
+        font-family: 'Courier New', Courier, monospace;
         font-size: 0.9em;
         margin: 0.5em 0;
     }
     .message-bubble code {
          font-family: 'Courier New', Courier, monospace;
-         background-color: rgba(0,0,0,0.05); /* Background tipis untuk inline code */
+         background-color: rgba(0,0,0,0.05);
          padding: 0.1em 0.3em;
          border-radius: 0.2rem;
     }
     .message-bubble pre code {
-        background-color: transparent; /* Hapus background jika di dalam <pre> */
+        background-color: transparent;
         padding: 0;
     }
     .message-bubble blockquote {
@@ -136,7 +132,7 @@
         font-style: italic;
     }
     .message-bubble table {
-        width: auto; /* Atau 100% jika ingin full width */
+        width: auto;
         border-collapse: collapse;
         margin: 1em 0;
         font-size: 0.9em;
@@ -150,7 +146,6 @@
         font-weight: 600;
      }
 
-
     .user-message {
         align-items: flex-end;
     }
@@ -160,18 +155,16 @@
         color: white;
         border-bottom-right-radius: 0.25rem;
     }
-     /* Override warna link di bubble user */
     .user-message .message-bubble a {
         color: #ffffff;
         text-decoration: underline;
     }
      .user-message .message-bubble code {
-         background-color: rgba(255, 255, 255, 0.2); /* Background kode di bubble user */
+         background-color: rgba(255, 255, 255, 0.2);
      }
      .user-message .message-bubble pre {
-         background-color: rgba(0, 0, 0, 0.2); /* Background pre di bubble user */
+         background-color: rgba(0, 0, 0, 0.2);
      }
-
 
      .ai-message {
          align-items: flex-start;
@@ -182,7 +175,6 @@
         color: #212529;
         border-bottom-left-radius: 0.25rem;
     }
-     /* Warna link default di bubble AI */
     .ai-message .message-bubble a {
         color: #0d6efd;
     }
@@ -220,7 +212,6 @@
         margin-left: 0.5rem;
      }
 
-     /* Style untuk tombol */
      .btn {
          border-radius: 0.5rem;
          padding: 0.5rem 1rem;
@@ -242,13 +233,11 @@
          border-color: #dc3545;
      }
 
-     /* Style untuk loading */
      #loading {
          color: #0d6efd;
          font-weight: 500;
      }
 
-     /* Footer styling */
      footer {
          margin-top: 3rem;
          padding: 1.5rem 0;
@@ -306,10 +295,7 @@
                   <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
                       <label for="responseType" class="form-label">Tipe Respon</label>
-                      <select class="form-select" id="responseType">
-                        <option value="default">Default</option>
-                        <option value="code">Kode</option>
-                        <option value="chat">Chat</option>
+                      <select class="form-select" id="responseType" disabled> <option value="chat" selected>Chat (Stream)</option>
                       </select>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
@@ -328,7 +314,7 @@
           <div class="d-flex justify-content-between align-items-center">
               <div>
                   <button class="btn btn-primary" onclick="sendPrompt()">Kirim</button>
-                  <button class="btn btn-secondary ms-2" onclick="copyResponse()">Salin Respon</button>
+                  <button class="btn btn-secondary ms-2" onclick="copyResponse()">Salin Respon Terakhir</button>
               </div>
               <div id="loading" class="d-none">
                   <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -351,7 +337,11 @@
                 </div>
         </div>
 
-      </div> </div> </div> <footer class="text-center py-4 mt-5">
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center py-4 mt-5">
     <p class="mb-0">© 2025 DeepSeek Client Mod. Dibuat dengan <span style="color: #e25555;">&hearts;</span></p>
   </footer>
 
@@ -359,79 +349,173 @@
 
   <script>
     const historyElement = document.getElementById('history');
-    const outputElement = document.getElementById('output');
+    const outputElement = document.getElementById('output'); // Masih bisa digunakan untuk error non-stream
     const loadingElement = document.getElementById('loading');
     const promptElement = document.getElementById('prompt');
     const apiKeyElement = document.getElementById('apiKey');
-    const responseTypeElement = document.getElementById('responseType');
+    // const responseTypeElement = document.getElementById('responseType'); // Tidak lagi krusial karena stream selalu chat
     const maxTokensElement = document.getElementById('maxTokens');
     const temperatureElement = document.getElementById('temperature');
 
-    // Konfigurasi Marked.js (opsional, bisa ditambahkan jika perlu kustomisasi)
-    // marked.setOptions({
-    //   breaks: true, // Mengubah baris baru menjadi <br>
-    //   gfm: true // Mengaktifkan GitHub Flavored Markdown
-    // });
+    // Variabel global untuk menyimpan ID elemen bubble AI yang sedang di-stream
+    let currentAiMessageBubbleId = null;
+    let accumulatedResponse = ""; // Untuk mengakumulasi respon stream sebelum disimpan
 
     /**
-     * Mengirim prompt ke API DeepSeek.
+     * Mengirim prompt ke API DeepSeek dengan stream.
      */
-    function sendPrompt() {
+    async function sendPrompt() {
       const apiKey = apiKeyElement.value.trim();
-      const prompt = promptElement.value.trim();
-      const type = responseTypeElement.value;
+      const userPrompt = promptElement.value.trim();
+      // const type = responseTypeElement.value; // Untuk stream, kita asumsikan 'chat'
       const maxTokens = parseInt(maxTokensElement.value);
       const temperature = parseFloat(temperatureElement.value);
 
-      if (!apiKey || !prompt) {
+      if (!apiKey || !userPrompt) {
         alert("Kunci API dan prompt tidak boleh kosong.");
         return;
       }
 
       loadingElement.classList.remove('d-none');
-      outputElement.textContent = '';
+      outputElement.textContent = ''; // Bersihkan output lama jika ada
       outputElement.classList.add('d-none');
+      promptElement.disabled = true; // Nonaktifkan input prompt selama streaming
 
-      fetch("https://api.deepseek.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [{ role: "user", content: prompt }],
-          temperature: temperature,
-          max_tokens: maxTokens,
-          stream: false
-        })
-      })
-        .then(res => {
-            if (!res.ok) {
-               return res.json().then(errData => {
-                   const errorMessage = errData.error?.message || `HTTP error! status: ${res.status}`;
-                   throw new Error(errorMessage);
-               });
-            }
-            return res.json();
-        })
-        .then(data => {
-          const result = data.choices?.[0]?.message?.content || "Tidak ada respons dari API.";
-          saveToHistory(prompt, result); // Simpan respons mentah (Markdown)
-          loadHistory(); // Muat ulang riwayat (akan diparse saat dimuat)
-          promptElement.value = '';
-        })
-        .catch(err => {
-          console.error("Error saat fetch API:", err);
-          const errorMessageToShow = `Error: ${err.message}`;
-          outputElement.textContent = errorMessageToShow;
-          outputElement.classList.remove('d-none');
-          alert(errorMessageToShow);
-        })
-        .finally(() => {
-          loadingElement.classList.add('d-none');
+      // Tambahkan pesan pengguna ke riwayat segera
+      addUserMessageToHistory(userPrompt, new Date().toISOString());
+      accumulatedResponse = ""; // Reset akumulator untuk respons baru
+
+      // Buat placeholder untuk pesan AI yang akan di-stream
+      currentAiMessageBubbleId = `ai-bubble-${Date.now()}`;
+      addAiMessagePlaceholderToHistory(currentAiMessageBubbleId, new Date().toISOString());
+
+      try {
+        const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat", // atau model lain yang mendukung stream
+            messages: [{ role: "user", content: userPrompt }],
+            temperature: temperature,
+            max_tokens: maxTokens,
+            stream: true // Ini kuncinya!
+          })
         });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => null); // Coba parse error JSON
+          const errorMessage = errData?.error?.message || `HTTP error! status: ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          // API DeepSeek mengirimkan data stream dalam format JSON per baris, dipisahkan oleh "data: "
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.substring(6);
+              if (jsonStr.trim() === '[DONE]') { // Akhir dari stream
+                break;
+              }
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const contentChunk = parsed.choices?.[0]?.delta?.content;
+                if (contentChunk) {
+                  accumulatedResponse += contentChunk;
+                  updateStreamedAiMessage(currentAiMessageBubbleId, accumulatedResponse);
+                }
+              } catch (e) {
+                console.warn("Gagal parse chunk JSON:", jsonStr, e);
+              }
+            }
+          }
+        }
+        // Setelah stream selesai, simpan akumulasi respons ke local storage
+        saveToHistory(userPrompt, accumulatedResponse);
+        // Tidak perlu loadHistory() lagi di sini karena sudah diupdate secara real-time
+        // dan item terakhir sudah final.
+
+      } catch (err) {
+        console.error("Error saat fetch API (stream):", err);
+        const errorMessageToShow = `Error: ${err.message}`;
+        // Tampilkan error di output umum jika ada, atau update placeholder AI dengan error
+        const aiBubbleElement = document.getElementById(currentAiMessageBubbleId);
+        if (aiBubbleElement) {
+            aiBubbleElement.innerHTML = marked.parse(`Terjadi kesalahan: ${escapeHtml(errorMessageToShow)}`);
+        } else {
+            outputElement.textContent = errorMessageToShow;
+            outputElement.classList.remove('d-none');
+        }
+        alert(errorMessageToShow);
+        // Jika terjadi error, simpan prompt dengan pesan error sebagai responsnya
+        saveToHistory(userPrompt, `Terjadi kesalahan: ${err.message}`);
+      } finally {
+        loadingElement.classList.add('d-none');
+        promptElement.value = ''; // Bersihkan input prompt setelah selesai atau error
+        promptElement.disabled = false; // Aktifkan kembali input prompt
+        currentAiMessageBubbleId = null; // Reset ID
+        scrollToBottom(); // Pastikan scroll ke bawah setelah semua selesai
+      }
     }
+
+    /**
+     * Menambahkan pesan pengguna ke tampilan riwayat.
+     */
+    function addUserMessageToHistory(prompt, time) {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-message user-message';
+        const userBubbleHtml = `<div class="message-bubble">${escapeHtml(prompt)}</div>`;
+        userDiv.innerHTML = `
+            <div class="message-sender">Anda</div>
+            ${userBubbleHtml}
+            <div class="message-time">${formatChatTime(time)}</div>
+        `;
+        historyElement.appendChild(userDiv);
+        scrollToBottom();
+    }
+
+    /**
+     * Menambahkan placeholder untuk pesan AI yang akan di-stream.
+     */
+    function addAiMessagePlaceholderToHistory(bubbleId, time) {
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'chat-message ai-message';
+        // ID ditambahkan ke elemen bubble itu sendiri
+        aiDiv.innerHTML = `
+             <div class="message-sender">DeepSeek</div>
+             <div class="message-bubble" id="${bubbleId}">
+                <div class="spinner-grow spinner-grow-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+             </div>
+             <div class="message-time">${formatChatTime(time)}</div>
+        `;
+        historyElement.appendChild(aiDiv);
+        scrollToBottom();
+    }
+
+    /**
+     * Mengupdate konten bubble pesan AI yang sedang di-stream.
+     */
+    function updateStreamedAiMessage(bubbleId, fullContent) {
+        const bubbleElement = document.getElementById(bubbleId);
+        if (bubbleElement) {
+            bubbleElement.innerHTML = marked.parse(fullContent || ''); // Parse Markdown
+            scrollToBottom(); // Scroll agar selalu terlihat
+        }
+    }
+
 
     /**
      * Menyalin respons AI terakhir (sebagai teks mentah) dari riwayat.
@@ -439,15 +523,19 @@
     function copyResponse() {
       const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
       if (history.length > 0) {
-          const lastResponse = history[history.length - 1].response; // Teks mentah
-          navigator.clipboard.writeText(lastResponse)
-            .then(() => alert("Respon AI terakhir (teks mentah) disalin!"))
-            .catch(err => {
-                console.error("Gagal menyalin:", err);
-                alert("Gagal menyalin teks.");
-            });
+          const lastAiEntry = history.filter(item => item.response).pop(); // Ambil entri AI terakhir yang punya respons
+          if (lastAiEntry) {
+            navigator.clipboard.writeText(lastAiEntry.response) // Teks mentah
+                .then(() => alert("Respon AI terakhir (teks mentah) disalin!"))
+                .catch(err => {
+                    console.error("Gagal menyalin:", err);
+                    alert("Gagal menyalin teks.");
+                });
+          } else {
+            alert("Tidak ada respon AI untuk disalin.");
+          }
       } else {
-          alert("Tidak ada respon untuk disalin.");
+          alert("Tidak ada riwayat percakapan.");
       }
     }
 
@@ -456,10 +544,13 @@
      */
     function saveToHistory(prompt, response) {
       let history = JSON.parse(localStorage.getItem('chatHistory')) || [];
+      // Update item terakhir jika itu adalah bagian dari stream yang sama
+      // Namun, dengan pendekatan baru, kita tambahkan user message dulu, lalu AI message setelah stream selesai
+      // Jadi, ini akan selalu menjadi item baru.
       history.push({
           prompt,
           response, // Simpan respons mentah (Markdown)
-          time: new Date().toISOString()
+          time: new Date().toISOString() // Sebaiknya waktu final dari stream
         });
       localStorage.setItem('chatHistory', JSON.stringify(history));
     }
@@ -472,35 +563,25 @@
         const history = JSON.parse(localStorage.getItem('chatHistory')) || [];
 
         history.forEach(item => {
-            // --- Pesan Pengguna ---
-            const userDiv = document.createElement('div');
-            userDiv.className = 'chat-message user-message';
-            // Gunakan escapeHtml untuk prompt pengguna demi keamanan
-            const userBubbleHtml = `<div class="message-bubble">${escapeHtml(item.prompt)}</div>`;
-            userDiv.innerHTML = `
-                <div class="message-sender">Anda</div>
-                ${userBubbleHtml}
-                <div class="message-time">${formatChatTime(item.time)}</div>
-            `;
-            historyElement.appendChild(userDiv);
+            // Pesan Pengguna
+            if (item.prompt) { // Pastikan ada prompt (untuk kasus di mana hanya ada respons error tanpa prompt sebelumnya)
+                addUserMessageToHistory(item.prompt, item.time);
+            }
 
-            // --- Pesan AI ---
-            const aiDiv = document.createElement('div');
-            aiDiv.className = 'chat-message ai-message';
-            // Parse Markdown respons AI menjadi HTML menggunakan marked.parse()
-            // PENTING: Tidak menggunakan escapeHtml di sini karena outputnya sudah HTML.
-            // PERHATIAN: Jika respons API bisa mengandung script berbahaya, pertimbangkan
-            // pustaka sanitasi seperti DOMPurify setelah parsing.
-            const aiBubbleHtml = `<div class="message-bubble">${marked.parse(item.response || '')}</div>`;
-            aiDiv.innerHTML = `
-                 <div class="message-sender">DeepSeek</div>
-                 ${aiBubbleHtml}
-                 <div class="message-time">${formatChatTime(item.time)}</div>
-            `;
-            historyElement.appendChild(aiDiv);
+            // Pesan AI
+            if (item.response) { // Hanya tampilkan jika ada respons
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'chat-message ai-message';
+                const aiBubbleHtml = `<div class="message-bubble">${marked.parse(item.response || '')}</div>`;
+                aiDiv.innerHTML = `
+                     <div class="message-sender">DeepSeek</div>
+                     ${aiBubbleHtml}
+                     <div class="message-time">${formatChatTime(item.time)}</div>
+                `;
+                historyElement.appendChild(aiDiv);
+            }
         });
-
-        scrollToBottom(); // Scroll ke bawah setelah memuat
+        scrollToBottom();
     }
 
     /**
@@ -509,15 +590,12 @@
     function clearHistory() {
       if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat percakapan?")) {
           localStorage.removeItem('chatHistory');
-          loadHistory();
+          historyElement.innerHTML = ''; // Langsung bersihkan tampilan
       }
     }
 
-    /**
-     * Fungsi utilitas untuk escape HTML sederhana.
-     */
     function escapeHtml(unsafe) {
-        if (!unsafe) return '';
+        if (typeof unsafe !== 'string') return '';
         return unsafe
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
@@ -526,23 +604,20 @@
              .replace(/'/g, "&#039;");
     }
 
-    /**
-     * Memformat waktu ISO string menjadi HH:MM.
-     */
     function formatChatTime(isoString) {
-        const date = new Date(isoString);
-        const options = { hour: '2-digit', minute: '2-digit', hour12: false };
-        return date.toLocaleTimeString('id-ID', options);
+        try {
+            const date = new Date(isoString);
+            const options = { hour: '2-digit', minute: '2-digit', hour12: false };
+            return date.toLocaleTimeString('id-ID', options);
+        } catch (e) {
+            return "Invalid date";
+        }
     }
 
-    /**
-     * Scroll otomatis ke bawah kontainer chat.
-     */
     function scrollToBottom() {
         historyElement.scrollTop = historyElement.scrollHeight;
     }
 
-    // --- Event Listeners ---
     promptElement.addEventListener('keypress', function(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -550,10 +625,8 @@
         }
     });
 
-    // Memuat riwayat saat halaman dibuka
     window.onload = loadHistory;
 
   </script>
 </body>
-
 </html>
